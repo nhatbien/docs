@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
+    "title": "OpenAI,Claude, Gemini,... Chat",
+    "description": "This API provides access to all models and features of OpenAI's chat completion service.",
     "license": {
       "name": "MIT"
     },
@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "https://api.bieapi.com"
     }
   ],
   "security": [
@@ -19,76 +19,113 @@
     }
   ],
   "paths": {
-    "/plants": {
-      "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+    "/v1/chat/completions": {
+      "post": {
+        "summary": "Create a chat completion",
+        "description": "This endpoint generates a chat completion response from OpenAI's models. You can use for Claude AI, GPT-4, and other models.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "boolean",
+                    "description": "Whether to use stream mode (simulates typing effect)."
+                  },
+                  "messages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "type": "string",
+                          "description": "Role of the message sender (e.g., `user`, `assistant`)."
+                        },
+                        "content": {
+                          "type": "string",
+                          "description": "Content of the message."
+                        }
+                      },
+                      "required": [
+                        "role",
+                        "content"
+                      ]
+                    },
+                    "description": "Context of the conversation."
+                  },
+                  "model": {
+                    "type": "string",
+                    "description": "The model to use (e.g., `gpt-4o-mini`)."
+                  }
+                },
+                "required": [
+                  "stream",
+                  "messages",
+                  "model"
+                ]
+              },
+              "examples": {
+                "basicExample": {
+                  "summary": "Basic Request",
+                  "value": {
+                    "model": "claude-3-5-sonnet-20240620",
+                    "messages": [
+                      {
+                        "role": "user",
+                        "content": "Hi"
+                      }
+                    ],
+                    "stream": false
                   }
                 }
               }
             }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
           }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
         },
         "responses": {
           "200": {
-            "description": "plant response",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique ID of the response."
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Type of the response object."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Timestamp of the response creation."
+                    },
+                    "choices": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "object",
+                            "properties": {
+                              "role": {
+                                "type": "string",
+                                "description": "Role of the message sender."
+                              },
+                              "content": {
+                                "type": "string",
+                                "description": "Content of the generated message."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -96,32 +133,68 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
+    "/v1/images/generations": {
+      "post": {
+        "summary": "Create an image generation",
+        "description": "This endpoint generates an image from OpenAI's models.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "model": {
+                    "type": "string",
+                    "description": "The model to use (e.g., `dall-e-2-mini`)."
+                  },
+                  "prompt": {
+                    "type": "string",
+                    "description": "Prompt for the image generation."
+                  }
+                },
+                "required": [
+                  "model",
+                  "prompt"
+                ]
+              },
+              "examples": {
+                "basicExample": {
+                  "summary": "Basic Request",
+                  "value": {
+                    "model": "dall-e-3",
+                    "prompt": "A painting of a cat."
+                  }
+                }
+              }
             }
           }
-        ],
+        },
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
+          "200": {
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique ID of the response."
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Type of the response object."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Timestamp of the response creation."
+                    },
+                    "image": {
+                      "type": "string",
+                      "description": "URL of the generated image."
+                    }
+                  }
                 }
               }
             }
@@ -131,60 +204,6 @@
     }
   },
   "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "securitySchemes": {
       "bearerAuth": {
         "type": "http",
